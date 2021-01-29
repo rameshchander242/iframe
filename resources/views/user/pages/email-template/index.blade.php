@@ -6,9 +6,12 @@
 @endpush
 
 @section('content')
-<div class="row mb-3">
-    <div class="col-6">
+<div class="content-header row mb-2">
+    <div class="col-sm-4">
         {!! Form::select('iframe', $iframes, '', ['class'=>'form-control', 'id'=>'iframe']) !!}
+    </div>
+    <div class="col-sm-8 text-right">
+        {!! edit_button( route('user.email-template.create') ,'fa-plus', ' Add New' ) !!}
     </div>
 </div>
 <div class="table-responsive1">
@@ -16,6 +19,7 @@
         <thead>
         <tr>
             <th>#Sr</th>
+            <th>Group</th>
             <th>Subject</th>
             <th>Message Type</th>
             <th>Status</th>
@@ -43,6 +47,12 @@
                 {
                     "data": "iframe_id",
                     "name": "iframe_id",
+                },{
+                    "data": "group",
+                    "name": "group",
+                    orderable: false, 
+                    searchable: false
+
                 },{
                     "data": "subject",
                     "name": "subject"

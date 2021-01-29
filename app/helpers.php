@@ -151,13 +151,14 @@ function error_email($msg) {
 }
 
 function sendgrid_mail($data) {
-
     $curl = curl_init();
     $email  = $data['email'];
     $name   = $data['name'];
     $body   = $data['body'];
     $subject = $data['subject'];
-    $from = $data['from'] ?? 'cleveland@computerrepairdoctor.com';
+        
+    $from_email = App\Models\Setting::where('name', 'from_email')->first('value');
+    $from = $data['from'] ?? $from_email->value;
 
     $data1 = array(
         "personalizations" => array(

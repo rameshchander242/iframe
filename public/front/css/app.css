@@ -13,15 +13,12 @@ h2 {
     text-align: center;
     text-transform: uppercase;
 }
-#app-iframe {
+#frame, #app-iframe {
     max-width: 1000px;
     margin: auto;
-    padding: 8px;
 }
 #frame {
     text-align: center;
-    margin: auto;
-    max-width: 100%;
 }
 div#title {
     margin: 20px 0 0;
@@ -37,6 +34,12 @@ div#title {
     margin: 5px;
     border-radius: 2px;
 }
+
+.selector:hover {
+    cursor: pointer;
+    box-shadow: rgb(91, 91, 91) 0px 2px 4px 1px;
+}
+
 
 
 .img-div {
@@ -62,6 +65,7 @@ div#title {
 
 #start_over i{
     font-size: 25px !important;
+    color: rgb(187, 37, 37);
 }
 #myProgress {
     width: 100%;
@@ -72,6 +76,7 @@ div#title {
 #myBar {
     width: 10%;
     height: 15px;
+    background-color: #bb2525;
     border-radius: 50px;
 }
 .price_label {
@@ -80,6 +85,10 @@ div#title {
     font-size: 13px;
     color: #999999;
 }
+.price_details_label, .fa, .fas {
+    color: #bb2525;
+}
+
 
 #select_form {
     text-align: left;
@@ -137,12 +146,15 @@ div#title {
     background-color: #eee;
     border-radius: 100px;
 }
-
+.check_container input:checked ~ .checkmark {
+    background-color: #bb2525;
+}
 #submit_btn {
     
     font-size: 18px;
     text-transform: uppercase;
     width: 100%;
+    background-color: #bb2525;
     color: white;
     font-weight: 600;
     border-radius: 2px;
@@ -227,17 +239,6 @@ div#title {
     padding: 36px 0 72px;
 }
 
-.text-iframe, .fa, .fas {
-    color: #bb2525;
-}
-.bg-iframe, .check_container input:checked ~ .checkmark {
-    background-color: #bb2525;
-}
-.fa.fa-spin.fa-spinner {
-    color: #ffffff;
-}
-.cursor-progress * {cursor: progress;}
-
 
 @media screen and (max-width:1100px) {
     #quote_form{width:45%;}
@@ -245,18 +246,30 @@ div#title {
     #store_info{width:100%;}
     #store_info iframe{ width: 100%; }
 }
-@media screen and (max-width:768px) {
+@media screen and (max-width:825px) {
     #quote_form{width:100%;height:auto!important;}
     #selected-options{width:100%;height:auto!important;}
     #store_info{width:100%;}
 }
 @media screen and (max-width:525px) {
-    .images{ max-height:140px; }
+    .images{max-height:140px;}
+    .fa {font-size:100px;}
+    .selector {width:175px;}
 }
-@media screen and (max-width:450px) and (min-width:360px) {
+@media screen and (max-width:450px) {
+    .images{max-height:125px;}
+    .fa {font-size:85px;}
     .selector {width:150px;}
-    .fa-8x { font-size: 7em; }
 }
-@media screen and (max-width:360px) {
-    .selector {width:200px;}
+@media screen and (max-width:375px) {
+    .device_label{font-size:15px;}
+    .images{max-height:115px;}
+    .fa {font-size:75px;}
+    .selector {width:135px;}
+}
+@media screen and (max-width:320px) {
+    .device_label{font-size:14px;}
+    .images{max-height:100px;}
+    .fa {font-size:75px;}
+    .selector {width:125px;}
 }

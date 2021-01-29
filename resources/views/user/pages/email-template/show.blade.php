@@ -4,7 +4,15 @@
 @section('content')
     <div class="row show-div">
         <div class="col-sm-4"><label>Message Type</label></div>
-        <div class="col-sm-8"> {{ title($email_type) }} </div>
+        <div class="col-sm-8"> {{ config('widget.'.$email_type) }} </div>
+
+        <div class="col-sm-4"><label>Group</label></div>
+        <div class="col-sm-8"> <?php
+            $group = isset($category['name']) ? 'Category: '.$category['name'].', ' : '';
+            $group .= isset($brand['name']) ? 'Brand: '.$brand['name'].', ' : '';
+            $group .= isset($series['name']) ? 'Series: '.$series['name'].'' : '';
+            ?>
+            {!! $group !!} </div>
         
         <div class="col-sm-4"><label>Subject</label></div>
         <div class="col-sm-8"> {{$subject}} </div>

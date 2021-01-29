@@ -77,7 +77,6 @@
         </div>
         <div class="form-group">
             {!!Form::label('hours', 'Hours')!!}
-            <?php $hours_Arr = ['Mon'=>'Monday', 'Tue'=>'Tuesday', 'Wed'=>'Wednesday', 'Thur'=>'Thursday', 'Fri'=>'Friday', 'Sat'=>'Saturday']; ?>
             @foreach ($hours_Arr as $hr_key=>$hr_val)
             <div class="row mb-3 time-schedule">
                 <label class="col-sm-4">
@@ -144,7 +143,10 @@ $(document).ready(function(){
             return false
         } else {
             $('.max_hr, .min_hr', p_div).parent().next('.hr-alert').html('');
-            if ( parseInt($('.max_hr', p_div).val()) <= parseInt($('.min_hr', p_div).val()) ) {
+            
+            var jdt1=Date.parse('20 Aug 2000 ' + $('.max_hr', p_div).val());
+            var jdt2=Date.parse('20 Aug 2000 ' + $('.min_hr', p_div).val());
+            if ( jdt1 <= jdt2 ) {
                 $('.max_hr, .min_hr', p_div).addClass('border-danger');
                 $('.max_hr, .min_hr', p_div).parent().next('.hr-alert').html('Please check Time');
                 return false

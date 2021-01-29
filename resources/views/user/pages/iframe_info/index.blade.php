@@ -98,9 +98,21 @@
             YajraDataTable.column(2).search( this.value ).draw();
         });
         $('#category').on('change', function(){
-            YajraDataTable.column(3).search( this.value ).draw();
+            var _token = "{{ csrf_token() }}";
+            var catName = this.value;
+            $(this).prev('label').append('<i class="ml-2 fa fa-spinner fa-spin"></i>');
+            $.ajax({
+                url: "{{ route('ajax.category-brands') }}", 
+                method: "POST",
+                data: {'name': catName, _token:_token},
+                success: function(result){
+                    $( "select#brand" ).replaceWith( result );
+                }
+            });
+
+            YajraDataTable.column(3).search( this.value ).column(4).search( '' ).draw();
         });
-        $('#brand').on('change', function(){
+        $(document).on('change', '#brand', function(){
             YajraDataTable.column(4).search( this.value ).draw();
         });
         

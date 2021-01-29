@@ -332,13 +332,13 @@ jQuery(document).ready(function($){
             var brand_id = $('#brand_id').val();
             var series_id = $('#series_id').val();
             var item_id = $('#item_id').val();
-            console.log('cat_id - '+cat_id, 'brand_id - '+brand_id, 'series_id - '+series_id, 'item_id - '+item_id);
+            
             if (cat_id != '' && iframe_info.categories && iframe_info.categories[cat_id]) {
                 $('#timeframe_lbl').html(iframe_info.categories[cat_id][dataId].timeframe);
                 $('#warranty_lbl').html(iframe_info.categories[cat_id][dataId].warranty);
                 $('#desc_lbl').html(iframe_info.categories[cat_id][dataId].description);
             }
-            if (brand_id != '' && iframe_info.categories && iframe_info.categories[cat_id]) {
+            if (brand_id != '' && iframe_info.brands && iframe_info.brands[cat_id]) {
                 $('#timeframe_lbl').html(iframe_info.brands[brand_id][dataId].timeframe);
                 $('#warranty_lbl').html(iframe_info.brands[brand_id][dataId].warranty);
                 $('#desc_lbl').html(iframe_info.brands[brand_id][dataId].description);
@@ -353,8 +353,10 @@ jQuery(document).ready(function($){
                 $('#warranty_lbl').html(iframe_info.items[item_id][dataId].warranty);
                 $('#desc_lbl').html(iframe_info.items[item_id][dataId].description);
             }
-            
-            $('#store_info_div').html( locationInfo.address_1 + '<br>' + locationInfo.address_2 + '<br>' + locationInfo.phone);
+            var strore_info = locationInfo.address_1 ? locationInfo.address_1 + '<br>' : '';
+            strore_info += locationInfo.address_2 ? locationInfo.address_2 + '<br>' : '';
+            strore_info += locationInfo.phone ? locationInfo.phone + '<br>' : '';
+            $('#store_info_div').html( strore_info );
             $('#theMapFrame').attr('src', locationInfo.map_url);
             sendPostMessage();
             
@@ -449,7 +451,6 @@ const sendPostMessage = () => {
       window.parent.postMessage({
         frameHeight: height
       }, '*');
-      console.log(height);
     }
 }
 window.onload = () => sendPostMessage();

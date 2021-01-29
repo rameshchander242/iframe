@@ -9,6 +9,17 @@
 <div class="text-right mb-2">
     {!! edit_button( route('item.create') ,'fa-plus', ' Add New' ) !!}
 </div>
+<div class="content-header row">
+    <div class="col-sm">
+    {!! Form::select('category', $categories, '', ['class'=>'form-control', 'id'=>'category', 'placeholder'=>'-- Select Category --']) !!}
+    </div>
+    <div class="col-sm">
+    {!! Form::select('brand', $brands, '', ['class'=>'form-control', 'id'=>'brand', 'placeholder'=>'-- Select Brand --']) !!}
+    </div>
+    <div class="col-sm">
+    {!! Form::select('series', $serieses, '', ['class'=>'form-control', 'id'=>'series', 'placeholder'=>'-- Select Series --']) !!}
+    </div>
+</div>
 
 <div class="table-responsive1">
     <table id="yajra_datatable" class="table table-bordered table-hover dataTable dtr-inline">
@@ -18,6 +29,8 @@
             <th>Image</th>
             <th>Item</th>
             <th>Category</th>
+            <th>Brand</th>
+            <th>Series</th>
             <th>Status</th>
             <th>Action</th>
         </tr> 
@@ -57,7 +70,14 @@
                 {
                     "data": "category",
                     "name": "category.name",
-                    orderable: false
+                },
+                {
+                    "data": "brand",
+                    "name": "brand.name",
+                },
+                {
+                    "data": "series",
+                    "name": "series.name",
                 },
                 {
                     "data": "status",
@@ -77,6 +97,15 @@
 
     $(document).ready(function() {
         var YajraDataTable = initDataTable();
+        $('#category').change( function() {
+            YajraDataTable.columns( 3 ).search( this.value ).draw();
+        });
+        $('#brand').change( function() {
+            YajraDataTable.columns( 4 ).search( this.value ).draw();
+        });
+        $('#series').change( function() {
+            YajraDataTable.columns( 5 ).search( this.value ).draw();
+        });
     });
 </script>
 @endpush

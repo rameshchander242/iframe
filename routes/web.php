@@ -13,28 +13,6 @@ use Illuminate\Support\Facades\Route;
 |
 */
 
-
-// Route::group([
-//     'namespace' => 'User\\Auth',
-// ], function () {
-
-//     // // Authentication Routes...
-//     // Route::get('login', 'LoginController@showLoginForm')->name('login_page');
-//     // Route::post('login', 'LoginController@login')->name('login');
-//     // Route::post('logout', 'LoginController@logout')->name('logout');
-
-//     // // Registration Routes...
-//     // Route::get('register', 'RegisterController@showRegistrationForm')->name('register_page');
-//     // Route::post('register', 'RegisterController@register')->name('register');
-//     // Route::get('register/activate/{token}', 'RegisterController@confirm')->name('email_confirm');
-
-//     // // Password Reset Routes...
-//     // Route::get('password/reset', 'ForgotPasswordController@showLinkRequestForm')->name('password.request');
-//     // Route::post('password/email', 'ForgotPasswordController@sendResetLinkEmail')->name('password.email');
-//     // Route::get('password/reset/{token}', 'ResetPasswordController@showResetForm')->name('password.reset');
-//     // Route::post('password/reset', 'ResetPasswordController@reset');
-
-// });
 Route::get('/linkstorage', function () {
     Artisan::call('storage:link');
 });
@@ -83,6 +61,8 @@ Route::group([
     Route::get('widget-iframe-ajax', 'IframeInfoController@list_ajax')->name('user.iframe_info.listajax');
     
     Route::get('email-template', 'EmailTemplateController@index')->name('user.email-template.index');
+    Route::get('email-template/create', 'EmailTemplateController@create')->name('user.email-template.create');
+    Route::post('email-template', 'EmailTemplateController@store')->name('user.email-template.store');
     Route::get('email-template/{id}', 'EmailTemplateController@show')->name('user.email-template.show');
     Route::get('email-template/{id}/edit', 'EmailTemplateController@edit')->name('user.email-template.edit');
     Route::put('email-template/{id}/update', 'EmailTemplateController@update')->name('user.email-template.update');
@@ -181,6 +161,10 @@ Route::group([
             /* Instruction Route */
             Route::resource('instruction', 'InstructionController');
             Route::get('instruction-ajax', 'InstructionController@list_ajax')->name('instruction.listajax');
+            
+            /* Setting Route */
+            Route::resource('setting', 'SettingController');
+            Route::get('setting-ajax', 'SettingController@list_ajax')->name('setting.listajax');
 
             Route::get('/cache/clear', function() {
                 Artisan::call('cache:clear');

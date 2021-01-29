@@ -9,7 +9,12 @@
 <div class="text-right mb-2">
     {!! edit_button( route('brand.create') ,'fa-plus', ' Add New' ) !!}
 </div>
-
+<div class="content-header row">
+    <div class="col-sm-4">
+    {!! Form::select('category', $categories, '', ['class'=>'form-control', 'id'=>'category', 'placeholder'=>'-- Select Category --']) !!}
+    </div>
+</div>
+<div class="table-responsive1">
     <table id="yajra_datatable" class="table table-bordered table-hover dataTable dtr-inline">
         <thead>
         <tr>
@@ -22,6 +27,7 @@
         </tr> 
         </thead>
     </table>
+</div>
 @endsection
 
 @push('custom_scripts')
@@ -53,7 +59,6 @@
                 }, {
                     "data": "category",
                     "name": "category.name", 
-                    orderable: false, 
                 }, {
                     "data": "status",
                     "name": "status"
@@ -71,6 +76,9 @@
 
     $(document).ready(function() {
         var YajraDataTable = initDataTable();
+        $('#category').change( function() {
+            YajraDataTable.columns( 3 ).search( this.value ).draw();
+        });
     });
 </script>
 

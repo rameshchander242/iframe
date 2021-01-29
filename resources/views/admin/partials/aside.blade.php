@@ -34,6 +34,7 @@
         'error-log' => ['text'=>'Errors', 'icon'=>'building', 'link'=>'error-log.index'],
         'queries'   => ['text'=>'Queries', 'icon'=>'envelope', 'link'=>'admin.queries.index'],
         'profile'   => ['text'=>'Profile', 'icon'=>'user', 'link'=>'admin.profile'],
+        'setting'   => ['text'=>'Setting', 'icon'=>'user', 'link'=>'setting.index'],
     ];
       ?>
       <!-- Sidebar Menu -->

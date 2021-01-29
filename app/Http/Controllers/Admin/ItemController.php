@@ -24,11 +24,15 @@ class ItemController extends Controller
     }
     
     public function index() {
-        return view('admin.pages.'.$this->nav.'.index');
+        $categories = Category::get()->pluck('name','name');
+        $brands = Brand::get()->pluck('name','name');
+        $serieses = Series::get()->pluck('name','name');
+        
+        return view('admin.pages.'.$this->nav.'.index', compact('categories', 'brands', 'serieses'));
     }
 
     public function list_ajax() {
-        $items = Item::with('category');
+        $items = Item::with('category', 'brand', 'series')->select('items.*');
 
         return DataTables::of($items)
                     ->addIndexColumn()
@@ -40,6 +44,12 @@ class ItemController extends Controller
                     })
                     ->editColumn('category', function ($row) {
                         return isset($row->category) ? $row->category->name : '--';
+                    })
+                    ->editColumn('brand', function ($row) {
+                        return isset($row->brand) ? $row->brand->name : '--';
+                    })
+                    ->editColumn('series', function ($row) {
+                        return isset($row->series) ? $row->series->name : '--';
                     })
                     ->editColumn('status', function ($row) {
                         return '<div class="text-center">' . view_status($row->status) . '</div>';

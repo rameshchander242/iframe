@@ -18,11 +18,24 @@ class EmailTemplate extends Authenticatable
      * @var array
      */
     protected $fillable = [
-        'subject', 'body', 'sms_message', 'iframe_id', 'status'
+        'email_type', 'category_id', 'brand_id', 'series_id', 'item_id', 'subject', 'body', 'sms_message', 'iframe_id', 'status', 'user_id', 'email_default'
     ];
 
 
     public function iframe() {
         return $this->belongsTo(Iframe::class);
+    }
+
+
+    public function category() {
+        return $this->belongsTo(Category::class);
+    }
+
+    public function brand() {
+        return $this->belongsTo(Brand::class);
+    }
+
+    public function series() {
+        return $this->belongsTo(Series::class);
     }
 }

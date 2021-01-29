@@ -10,9 +10,12 @@ use App\Models\Location;
 use App\Models\User;
 use App\Models\Widget_Quote;
 use App\Http\Controllers\ErrorLogController;
+
 use App\Mail\SendGridEmail;
 
-class IframeController extends Controller {
+class IframeController extends Controller
+{
+
     /**
      * Show the application dashboard.
      *
@@ -51,8 +54,8 @@ class IframeController extends Controller {
 
     public function submit_widget(Request $request) {
         $err = new ErrorlogController();
+        $data = $request->all();
         try{
-            $data = $request->all();
             $data['ip_address'] = $_SERVER['REMOTE_ADDR'];
             $iframe = Iframe::find($data['iframe_id']);
             $itemServices = json_decode($iframe['item_service'], true);
@@ -70,27 +73,61 @@ class IframeController extends Controller {
             ];
             $err->set_error_log($error);
         }
-
+        $price = !empty($query['price']) ? $query['price'] : 'Varies. Please call us for a price';
         $query = Widget_Quote::with('category', 'item', 'service', 'location')->find($widget->id);
+        
+        $store_hour = '';
+        if (isset($query['location']['hours']) && !empty($query['location']['hours'])) {
+            foreach ($query['location']['hours'] as $day=>$time) {
+                $store_hour .= $day . ':' . date('h:iA', strtotime($time['from'])) . '-' . date('h:iA', strtotime($time['to'])) . ', ';
+            }
+            $store_hour = substr(trim($store_hour), 0, -1);
+        }
+
         $shortcodes = [
-            '[CUSTOMER_NAME]' => $query['fullname'],
-            '[CUSTOMER_EMAIL]' => $query['email'],
-            '[CUSTOMER_PHONE]' => $query['phone'],
-            '[CUSTOMER_MESSAGE]' => $query['message'],
-            '[PRICE]' => $query['price'],
-            '[DEVICE]' => $query['category']['name'],
-            '[MODEL]' => $query['item']['name'],
-            '[SERVICE]' => $query['service']['name'],
-            '[STORE_NAME]' => $query['location']['store_name'],
-            '[STORE_DETAIL]' => $query['location']['address_1'],
+            '[CUSTOMER_NAME]'   => $query['fullname'],
+            '[CUSTOMER_EMAIL]'  => $query['email'],
+            '[CUSTOMER_PHONE]'  => $query['phone'],
+            '[CUSTOMER_MESSAGE]'=> $query['message'],
+            '[PRICE]'           => $price,
+            '[DEVICE]'          => $query['category']['name'],
+            '[MODEL]'           => $query['item']['name'] ?? '',
+            '[SERVICE]'         => $query['service']['name'],
+            '[STORE_NAME]'      => $query['location']['store_name'],
+            '[STORE_ADDRESS_1]' => $query['location']['address_1'],
+            '[STORE_ADDRESS_2]' => $query['location']['address_2'],
+            '[STORE_CITY]'      => $query['location']['city'],
+            '[STORE_PHONE]'     => $query['location']['phone'],
+            '[STORE_HOUR]'      => $store_hour,
+            '[STORE_LOCATION_DESC]'  => $query['location']['description'],
         ];
-        // echo "<pre>"; print_r($email_shortcode); exit;
         
         $location = $query['location'];
 
         /* Send EMail/SMS to Customer */
-        $where = ['iframe_id'=>$widget['iframe_id'], 'email_type'=>'client_email'];
-        $emailTemplate = EmailTemplate::where($where)->first()->toArray();
+        $emailTemplate = [];
+        $where = ['iframe_id'=>$widget['iframe_id'], 'email_type'=>'user_email'];
+        if ( isset($data['series_id']) && !empty($data['series_id']) ) {
+            $where_series = array_merge($where, ['series_id'=>$data['series_id']]);
+            $emailTemplate = EmailTemplate::where($where_series)->first();
+        }
+        if ( !$emailTemplate ) {
+            if ( isset($data['brand_id']) && !empty($data['brand_id']) ) {
+                $where_brand = array_merge($where, ['brand_id'=>$data['brand_id']]);
+                $emailTemplate = EmailTemplate::where($where_brand)->first();
+            }
+        }
+        if ( !$emailTemplate ) {
+            if ( isset($data['category_id']) && !empty($data['category_id']) ) {
+                $where_category = array_merge($where, ['category_id'=>$data['category_id']]);
+                $emailTemplate = EmailTemplate::where($where_category)->first();
+            }
+        }
+        if ( !$emailTemplate ) {
+            $emailTemplate = EmailTemplate::where($where)->first();
+        }
+        $emailTemplate = $emailTemplate->toArray();
+
         if ( $widget['contact'] == 'sms' ) {
             $sms_data = [
                 'from'  => $location['ctm_code'],
@@ -125,7 +162,7 @@ class IframeController extends Controller {
         }
 
         /* Send Email to Client */
-        $where = ['iframe_id'=>$widget['iframe_id'], 'email_type'=>'user_email'];
+        $where = ['iframe_id'=>$widget['iframe_id'], 'email_type'=>'client_email'];
         $emailTemplate = EmailTemplate::where($where)->first()->toArray();
         $froms = explode(',', ($location['additional_email']));
         $froms[] = $location['email'];

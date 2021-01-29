@@ -22,6 +22,7 @@ class UserController extends Controller
     }
     
     public function index() {
+
         return view('admin.pages.'.$this->nav.'.index');
     }
 
@@ -64,9 +65,27 @@ class UserController extends Controller
         if($validator->fails())  {
             return back()->withErrors($validator)->withInput();
         }
+        $password = $request->password;
         $request = $this->saveFiles($request, $this->nav);
-        $request->merge(['password' => Hash::make($request->password)]);
+        $request->merge(['password' => Hash::make($password)]);
         $user = User::create($request->all());
+
+        $body = 'Thanks for signing up for an Instant Quote Widget! Please follow this link and login with your credentials here:
+            <br><br>
+            '.url('/').'
+            <br>
+            Email - '.$request->email.'
+            <br>
+            Password - '.$password.'
+            <br><br>
+            Please navigate to Profile > Security to update your password at your earliest convenience!';
+        $mailData = [
+            'name'  => $user->name,
+            'email' => $user->email,
+            'subject'   => 'New Account on Instant Quote Widget',
+            'body'  => $body,
+        ];
+        sendgrid_mail($mailData);
 
         return redirect()->route('client.index')->withSuccess("User Create successfully");
     }

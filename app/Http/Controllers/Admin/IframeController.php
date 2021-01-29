@@ -38,7 +38,7 @@ class IframeController extends Controller
                     ->addIndexColumn()
                     ->addColumn('action', function($row){
                         $btn = edit_button( route('iframe.edit', $row->id) ) . '&nbsp; ' .
-                        // view_button( route('iframe.widget', $row->id) ) . '&nbsp; ' .
+                        modal_button( $row->id ) . '&nbsp; ' .
                         delete_button( route('iframe.destroy', $row->id) );
                         return $btn;
                     })
@@ -80,6 +80,10 @@ class IframeController extends Controller
         $iframe = Iframe::create($request->all());
         $this->create_with_iframe($iframe);
         
+        $iframe->item_service = $this->item_service($iframe);
+        $iframe->iframe_data = json_encode( $this->iframe_data($iframe) );
+        $iframe->update();
+        
         return redirect()->route('iframe.index')->withSuccess("Iframe Create successfully");
     }
 
@@ -101,6 +105,10 @@ class IframeController extends Controller
         $iframe = Iframe::findOrFail($id);
         $validator = $request->validate($this->rules());
         $iframe->update($request->all());
+
+        $iframe->item_service = $this->item_service($iframe);
+        $iframe->iframe_data = json_encode( $this->iframe_data($iframe) );
+        $iframe->update();
 
         return redirect()->route('iframe.index')->withSuccess('Iframe Update successfully');
     }
@@ -319,5 +327,151 @@ class IframeController extends Controller
         $iframe_info->insert($data);
 
         return $iframe_info;
+    }
+
+    
+
+    
+
+    private function item_service($iframe) {
+        $item_service = [];
+        $allBrands = ['-1'];
+        if (isset($iframe->brand) && is_array($iframe->brand)) {
+            foreach ($iframe->brand as $brand) {
+                $allBrands = array_merge( $allBrands, $brand );
+            }
+        }
+        $ids_ordered = implode(',', $iframe->category);
+        $iframe1['categories'] = Category::with(['brands' => function($query) use ($allBrands) {
+            $ids_ordered = implode(',', $allBrands);
+            $query->wherein('id', $allBrands)->orderByRaw("FIELD(id, ".($ids_ordered ?? '-1') .")");
+        }])->with(['items' => function($query) use ($allBrands) {
+            $query->whereNull('brand_id');
+        }])->wherein('id', $iframe->category)->orderByRaw("FIELD(id, $ids_ordered)")->get();
+        
+
+        $services = $iframe->service;
+        $allservices = ['-1'];
+        foreach ($iframe1['categories'] as $key=>$category) {
+            $ser = $iframe->service[$category['id']] ?? [];
+            $ids_ordered = implode(',', $ser);
+            $ids_ordered = empty($ids_ordered) ? '-1' : $ids_ordered;
+            $services = Service::wherein('id', $ser)->orderByRaw("FIELD(id, $ids_ordered)")->get();
+            $b = 0;
+            foreach ($category['brands'] as $brand) {
+                $b++;
+                $brand_items = sort_data($brand['items']->toArray(), [], 'key');
+                foreach ($brand_items as $item) {
+                    if( in_array($item['id'], $iframe['item'][$category['id']] ?? []) ) {
+                        foreach ($services as $service) {
+                            $item_service[$category['id']][$item['id']][$service['id']]['default'] = '';
+                        }
+                    }
+                }
+            }
+            if ($b == 0) {
+                $category_items = sort_data($category['items']->toArray(), [], 'key');
+                foreach ($category_items as $item) {
+                    if( in_array($item['id'], $iframe['item'][$category['id']] ?? []) ) {
+                        foreach ($services as $service) {
+                            $item_service[$category['id']][$item['id']][$service['id']]['default'] = '';
+                        }
+                    }
+                }
+            }
+        }
+        return $item_service;
+    }
+    
+    private function iframe_data($iframe) {
+        // echo "<pre>"; print_r($iframe); exit;
+        $loc_cols = ['id', 'user_id', 'store_name', 'address_1', 'address_2', 'city', 'phone', 'email', 'additional_email', 'ctm_code', 'map_url', 'description', 'hours', 'price_sheet'];
+        $category_cols = ['id', 'name', 'image'];
+        $brand_cols = ['id', 'name', 'image'];
+        $series_cols = ['id', 'name', 'image'];
+        $item_cols = ['id', 'name', 'image'];
+        $service_cols = ['id', 'name', 'icon'];
+
+        $ids_ordered = implode(',', $iframe->location);
+        $locations = Location::wherein('id', $iframe->location)->orderByRaw("FIELD(id, $ids_ordered)")->where('status', '1')->get($loc_cols)->toArray();
+
+        $ids_ordered = implode(',', $iframe->category);
+        $categories = Category::wherein('id', $iframe->category)->orderByRaw("FIELD(id, $ids_ordered)")->where('status', '1')->orderBy('position', 'asc')->get($category_cols)->toArray();
+        foreach ($categories as $key=>$category) {
+            if ( isset($iframe->item_service[$category['id']]) ) {
+                $item_service = $iframe->item_service[$category['id']];
+            } else {
+                $item_service = [];
+            }
+            $services = [];
+            if ( is_array($iframe->service) and !empty($iframe->service) ) {
+                if ( array_key_exists($category['id'], $iframe->service) ) {
+                    $ids = $iframe->service[$category['id']];
+                    $ids_ordered = implode(',', $ids);
+                    $services = Service::wherein( 'id', $ids )->orderByRaw("FIELD(id, $ids_ordered)")->where(['status'=>'1'])->orderBy('position', 'asc')->get($service_cols)->toArray();
+                }
+            }
+            $categories[$key]['services'] = $services;
+
+            $brands = [];
+            if ( is_array($iframe->brand) and !empty($iframe->brand) ) {
+                if ( array_key_exists($category['id'], $iframe->brand) ) {
+                    $ids = $iframe->brand[$category['id']];
+                    $ids_ordered = implode(',', $ids);
+                    $brands = Brand::wherein( 'id', $ids )->orderByRaw("FIELD(id, $ids_ordered)")->where('status', '1')->orderBy('position', 'asc')->get($brand_cols)->toArray();
+
+                    foreach ($brands as $b_key=>$brand) {
+                        $series = Series::where(['brand_id'=>$brand['id'], 'status'=>'1'])->orderBy('position', 'asc')->get($series_cols);
+                        $series = json_decode( json_encode($series), true);
+                        if ( is_array($series) and !empty($series) ) {
+                            foreach ($series as $s_key=>$ser) {
+                                $items = Item::where(['series_id'=>$ser['id'], 'status'=>'1'])->orderBy('position', 'asc')->get($item_cols)->toArray();
+                                $items = $this->itemService($items, $item_service);
+                                $series[$s_key]['items'] = $items;
+                                $series[$s_key]['image'] = asset( upload_url('series') . $ser['image'] );
+                            }
+                        } else {
+                            $items = Item::where(['brand_id'=>$brand['id'], 'status'=>'1'])->orderBy('position', 'asc')->get($item_cols)->toArray();
+                            $items = $this->itemService($items, $item_service);
+                            $brands[$b_key]['items'] = $items;
+                        }
+                        $brands[$b_key]['series'] = $series;
+                        $brands[$b_key]['image'] = asset( upload_url('brand') . $brand['image'] );
+                    }
+                } else {
+                    $items = Item::where(['category_id'=>$category['id'], 'status'=>'1'])->orderBy('position', 'asc')->get($item_cols)->toArray();
+                    $items = $this->itemService($items, $item_service);
+                    $categories[$key]['items'] = $items;
+                }
+            }
+            $categories[$key]['brands'] = $brands;
+            $categories[$key]['image'] = asset( upload_url('category') . $category['image'] );
+        }
+        
+        $iframeData = [
+            'id'  => $iframe->id,
+            'name'  => $iframe->name,
+            'user_id'  => $iframe->user_id,
+            'locations'  => $locations,
+            'categories'  => $categories,
+        ];
+        return $iframeData;
+    }
+
+    private function itemService($items, $item_service) {
+        if (!empty($items)) {
+            $returnItems = [];
+            foreach ($item_service as $key=>$is) {
+                foreach ($items as $item) {
+                    if ($item['id'] == $key) {
+                        $item['service'] = $item_service[$item['id']];
+                        $item['image'] = asset( upload_url('item') . $item['image'] );
+                        $returnItems[] = $item;
+                    }
+                }
+            }
+            return $returnItems;
+        }
+        return $items;
     }
 }

@@ -23,11 +23,13 @@ class BrandController extends Controller
     }
 
     public function index() {
-        return view('admin.pages.'.$this->nav.'.index');
+        $categories = Category::get()->pluck('name','name');
+
+        return view('admin.pages.'.$this->nav.'.index', compact('categories'));
     }
 
     public function list_ajax() {
-        $brands = Brand::with('category');
+        $brands = Brand::with('category')->select('brands.*');
 
         return DataTables::of($brands)
                     ->addIndexColumn()

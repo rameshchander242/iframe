@@ -6,11 +6,17 @@
 @endpush
 
 @section('content')
+<div class="content-header row mb-2">
+    <div class="col-sm-12 text-right">
+        {!! edit_button( route('email-template.create') ,'fa-plus', ' Add New' ) !!}
+    </div>
+</div>
 <div class="table-responsive1">
     <table id="yajra_datatable" class="table table-bordered table-hover dataTable dtr-inline">
         <thead>
         <tr>
             <th>#Sr</th>
+            <th>Group</th>
             <th>Subject</th>
             <th>Message Type</th>
             <th>Status</th>
@@ -40,18 +46,21 @@
                     "data": "id",
                     "name": "id"
                 },{
+                    "data": "group",
+                    "name": "group",
+                    orderable: false, 
+                    searchable: false
+
+                },{
                     "data": "subject",
                     "name": "subject"
-                },
-                {
+                },{
                     "data": "email_type",
                     "name": "email_type"
-                },
-                {
+                },{
                     "data": "status",
                     "name": "status"
-                },
-                {
+                },{
                     data: 'action', 
                     name: 'action', 
                     orderable: false, 

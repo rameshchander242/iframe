@@ -20,10 +20,20 @@ class AjaxController extends Controller
     }
 
     public function category_brands(request $request) {
-        $id = $request->id;
-        $brands = Brand::where('category_id', $id)->where('status', '1')->get()->pluck('name', 'id');
-        $brand = Form::label('brand_id', 'Brand');
-        $brand .= Form::select('brand_id', $brands, '', ['class'=>'form-control', 'placeholder'=>'-- Select Brand --']);
+        $brand = '';
+        if (isset($request->id)) {
+            $id = $request->id;
+            $brands = Brand::where('category_id', $id)->where('status', '1')->get()->pluck('name', 'id');
+            $brand .= Form::label('brand_id', 'Brand');
+            $brand .= Form::select('brand_id', $brands, '', ['class'=>'form-control', 'placeholder'=>'-- Select Brand --']);
+        } else if (isset($request->name)) {
+            $name = $request->name;
+            $brands = Brand::whereHas('category', function ($query) use ($name) {
+                return $query->where('name', $name);
+            })->where('status', '1')->get()->pluck('name', 'name');
+            $brand .= Form::select('brand_id', $brands, '', ['class'=>'form-control', 'placeholder'=>'-- Select Brand --', 'id'=>'brand']);
+
+        }
         return $brand;
     }
 

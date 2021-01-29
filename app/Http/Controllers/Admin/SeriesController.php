@@ -24,11 +24,14 @@ class SeriesController extends Controller
     }
     
     public function index() {
-        return view('admin.pages.'.$this->nav.'.index');
+        $categories = Category::get()->pluck('name','name');
+        $brands = Brand::get()->pluck('name','name');
+
+        return view('admin.pages.'.$this->nav.'.index', compact('categories', 'brands'));
     }
 
     public function list_ajax() {
-        $series = Series::with('category')->with('brand');
+        $series = Series::with('category', 'brand')->select('series.*');
 
         return DataTables::of($series)
                     ->addIndexColumn()

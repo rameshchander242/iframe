@@ -26,6 +26,9 @@ class LocationController extends Controller
 
     public function list_ajax() {
         $locations = Location::with('user')->select('locations.*');
+        if (isset($_GET['columns'][4]['search']['value']) && !empty($_GET['columns'][4]['search']['value'])) {
+            session([ 'location_client' => $_GET['columns'][4]['search']['value'] ]);
+        }
 
         return DataTables::of($locations)
                     ->addIndexColumn()
@@ -51,11 +54,21 @@ class LocationController extends Controller
     public function create() {
         $users = User::where('status', '1')->orderBy('name', 'asc')->get()->pluck('name', 'id');
         $hrs = [];
-        for($i=1; $i<24; $i++) {
-            $hrs[$i . ':00'] = $i . ':00';
+        $location_client = '';
+        $slc = session('location_client');
+        if ( isset($slc) && !empty($slc)) {
+            $userData = User::where('name', $slc)->first();
+            $location_client = $userData->id;
         }
+        
+        $range=range(strtotime("00:00"),strtotime("23:30"), 30*60);
+        foreach($range as $time){
+                $dtime = date("h:i A", $time)."\n";
+                $hrs[$dtime] = $dtime;
+        }
+        $hours_Arr = ['Mon'=>'Monday', 'Tue'=>'Tuesday', 'Wed'=>'Wednesday', 'Thur'=>'Thursday', 'Fri'=>'Friday', 'Sat'=>'Saturday', 'Sun'=>'Sunday'];
 
-        return view('admin.pages.'.$this->nav.'.create', compact( 'users', 'hrs'));
+        return view('admin.pages.'.$this->nav.'.create', compact( 'users', 'hrs', 'hours_Arr', 'location_client'));
     }
 
     public function store(request $request) {
@@ -80,11 +93,15 @@ class LocationController extends Controller
         $location = Location::find($id);
         $users = User::where('status', '1')->orderBy('name', 'asc')->get()->pluck('name', 'id');
         $hrs = [];
-        for($i=1; $i<24; $i++) {
-            $hrs[$i . ':00'] = $i . ':00';
+        
+        $range=range(strtotime("00:00"),strtotime("23:30"), 30*60);
+        foreach($range as $time){
+                $dtime = date("h:i A", $time)."\n";
+                $hrs[$dtime] = $dtime;
         }
+        $hours_Arr = ['Mon'=>'Monday', 'Tue'=>'Tuesday', 'Wed'=>'Wednesday', 'Thur'=>'Thursday', 'Fri'=>'Friday', 'Sat'=>'Saturday', 'Sun'=>'Sunday'];
 
-        return view('admin.pages.'.$this->nav.'.edit', $location, compact('users', 'hrs'));
+        return view('admin.pages.'.$this->nav.'.edit', $location, compact('users', 'hrs', 'hours_Arr'));
     }
 
     public function update(request $request, $id) {

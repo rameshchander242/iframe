@@ -52,16 +52,16 @@ class QueryController extends Controller
                         return $btn;
                     })
                     ->addColumn('location', function ($row) {
-                        return $row->location->store_name;
+                        return $row->location->store_name ?? '';
                     })
                     ->editColumn('category', function ($row) {
-                        return $row->category->name;
+                        return $row->category->name ?? '';
                     })
                     ->editColumn('item', function ($row) {
-                        return $row->item->name;
+                        return $row->item->name ?? '';
                     })
                     ->editColumn('service', function ($row) {
-                        return $row->service->name;
+                        return $row->service->name ?? '';
                     })
                     ->editColumn('created_at', function ($row) {
                         return date('Y-m-d H:i:s', strtotime($row->created_at));

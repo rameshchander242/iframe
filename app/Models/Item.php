@@ -25,4 +25,12 @@ class Item extends Authenticatable
         return $this->belongsTo(Category::class);
     }
 
+    public function brand() {
+        return $this->belongsTo(Brand::class);
+    }
+
+    public function series() {
+        return $this->belongsTo(Series::class);
+    }
+
 }

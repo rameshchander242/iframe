@@ -5,7 +5,7 @@
 {!! Form::open(['method' => 'POST', 'route' => ['location.store'], 'id'=>'locationForm']) !!}
     <div class="form-group">
         {!!Form::label('user_id', 'Client')!!} <span class="text-danger">*</span>
-        {!! Form::select('user_id', $users, '', ['class'=>'form-control', 'placeholder'=>'-- Select Client --', 'required'=>true]) !!}
+        {!! Form::select('user_id', $users, $location_client, ['class'=>'form-control', 'placeholder'=>'-- Select Client --', 'required'=>true]) !!}
         {!! $errors->first('user_id', '<p class="text-danger">:message</p>') !!}
     </div>
     <div class="form-group">
@@ -74,7 +74,7 @@
     </div>
     <div class="form-group">
         {!!Form::label('hours', 'Hours')!!}
-        <?php $hours_Arr = ['Mon'=>'Monday', 'Tue'=>'Tuesday', 'Wed'=>'Wednesday', 'Thur'=>'Thursday', 'Fri'=>'Friday', 'Sat'=>'Saturday']; ?>
+        <?php  ?>
         @foreach ($hours_Arr as $hr_key=>$hr_val)
         <div class="row mb-3 time-schedule">
             <label class="col-sm-4">
@@ -142,7 +142,10 @@ $(document).ready(function(){
             return false
         } else {
             $('.max_hr, .min_hr', p_div).parent().next('.hr-alert').html('');
-            if ( parseInt($('.max_hr', p_div).val()) <= parseInt($('.min_hr', p_div).val()) ) {
+            
+            var jdt1=Date.parse('20 Aug 2000 ' + $('.max_hr', p_div).val());
+            var jdt2=Date.parse('20 Aug 2000 ' + $('.min_hr', p_div).val());
+            if ( jdt1 <= jdt2 ) {
                 $('.max_hr, .min_hr', p_div).addClass('border-danger');
                 $('.max_hr, .min_hr', p_div).parent().next('.hr-alert').html('Please check Time');
                 return false
